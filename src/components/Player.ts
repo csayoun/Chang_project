@@ -29,7 +29,6 @@ export class Player {
     
     // 갤러그 스타일 우주선 (흰색/회색)
     const centerX = this.x + this.width / 2;
-    const centerY = this.y + this.height / 2;
     
     // 메인 몸체 (흰색)
     ctx.fillStyle = '#FFFFFF';

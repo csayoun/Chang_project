@@ -50,7 +50,7 @@ export class Enemy {
     this.animationFrame = 0;
   }
 
-  update(canvasWidth: number, canvasHeight: number) {
+  update(canvasWidth: number) {
     this.animationFrame++;
     
     if (this.isBoss) {
@@ -108,8 +108,6 @@ export class Enemy {
       ctx.fillRect(this.x, this.y - 10, barWidth * healthPercent, barHeight);
     } else {
       // 픽셀 아트 스타일로 적 그리기
-      const wingFrame = Math.floor(this.animationFrame / 10) % 2; // 날개 애니메이션
-      
       if (this.enemyType === 'crab') {
         // 게 모양 적 (연두색/노란색)
         ctx.fillStyle = '#90EE90'; // 연두색
@@ -132,8 +130,6 @@ export class Enemy {
         
       } else if (this.enemyType === 'butterfly') {
         // 나비 모양 적 (주황색/흰색)
-        const wingOffset = wingFrame * 2;
-        
         // 몸체
         ctx.fillStyle = '#FFA500'; // 주황색
         ctx.fillRect(this.x + 12, this.y + 4, 4, 16);
@@ -159,8 +155,6 @@ export class Enemy {
         
       } else if (this.enemyType === 'bee') {
         // 벌 모양 적 (파란색/노란색)
-        const wingOffset = wingFrame * 2;
-        
         // 몸체 (노란색)
         ctx.fillStyle = '#FFFF00';
         ctx.fillRect(this.x + 8, this.y + 6, 14, 12);
@@ -220,7 +214,7 @@ export class Enemy {
     );
   }
 
-  shouldShoot(canvasHeight: number): boolean {
+  shouldShoot(): boolean {
     if (this.isBoss) {
       return Math.random() < 0.02;
     }

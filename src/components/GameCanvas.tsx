@@ -21,7 +21,7 @@ export function GameCanvas() {
   const lastShotTimeRef = useRef<number>(0);
   const shotCooldown = 150; // ms
 
-  const { state, stage, score, lives, isBossActive, addScore, loseLife, nextStage, setBossActive, resetGame } = useGameStore();
+  const { state, stage, lives, addScore, loseLife, nextStage, setBossActive } = useGameStore();
 
   // 초기화
   useEffect(() => {
@@ -195,10 +195,10 @@ export function GameCanvas() {
         setEnemies((prevEnemies) => {
           const updated = prevEnemies
             .map((enemy) => {
-              enemy.update(CANVAS_WIDTH, CANVAS_HEIGHT);
+              enemy.update(CANVAS_WIDTH);
               
               // 적 발사
-              if (enemy.shouldShoot(CANVAS_HEIGHT)) {
+              if (enemy.shouldShoot()) {
                 const bullet = new Bullet(
                   enemy.x + enemy.width / 2 - 2,
                   enemy.y + enemy.height,
