@@ -1,38 +1,56 @@
 import { useGameStore } from '../store/useGameStore';
 
 export function UIOverlay() {
-  const { score, lives, stage, isBossActive } = useGameStore();
+  const { score, highScore, lives, stage, isBossActive } = useGameStore();
 
   return (
-    <div className="absolute top-0 left-0 right-0 p-4 pointer-events-none">
-      <div className="flex justify-between items-start text-white font-pixel text-sm">
-        <div className="flex flex-col gap-2">
-          <div className="text-neon-blue drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]">
-            SCORE: {score.toLocaleString()}
-          </div>
-          <div className="text-neon-green drop-shadow-[0_0_8px_rgba(0,255,0,0.8)]">
-            STAGE: {stage}
-          </div>
-          {isBossActive && (
-            <div className="text-neon-pink drop-shadow-[0_0_8px_rgba(255,0,255,0.8)] animate-pulse">
-              BOSS BATTLE!
-            </div>
-          )}
+    <div className="absolute top-0 right-0 p-4 pointer-events-none">
+      <div className="flex flex-col gap-3 text-white font-pixel text-xs" style={{ fontFamily: 'Press Start 2P, monospace' }}>
+        {/* HIGH SCORE */}
+        <div className="text-white">
+          <div className="text-[10px] leading-tight">HIGH SCORE</div>
+          <div className="text-sm leading-tight">{highScore.toLocaleString().padStart(5, '0')}</div>
         </div>
-        <div className="flex gap-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className={`w-6 h-6 ${
-                i < lives
-                  ? 'text-red-500 drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]'
-                  : 'text-gray-500 opacity-30'
-              }`}
-            >
-              ❤️
-            </div>
-          ))}
+        
+        {/* 1UP (현재 점수) */}
+        <div className="text-white">
+          <div className="text-[10px] leading-tight">1UP</div>
+          <div className="text-sm leading-tight">{score.toLocaleString().padStart(5, '0')}</div>
         </div>
+        
+        {/* STAGE */}
+        <div className="text-white">
+          <div className="text-[10px] leading-tight">STAGE</div>
+          <div className="text-sm leading-tight">{stage.toString().padStart(2, '0')}</div>
+        </div>
+        
+        {/* 생명 (작은 우주선 아이콘) */}
+        <div className="flex flex-col gap-1 mt-2">
+          <div className="text-[8px] leading-tight">LIVES</div>
+          <div className="flex gap-1">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className={`w-4 h-4 ${
+                  i < lives
+                    ? 'opacity-100'
+                    : 'opacity-20'
+                }`}
+                style={{
+                  background: i < lives ? '#FFFFFF' : '#666666',
+                  clipPath: 'polygon(50% 0%, 0% 100%, 25% 70%, 75% 70%, 100% 100%)',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        
+        {/* 보스 배틀 표시 */}
+        {isBossActive && (
+          <div className="text-yellow-400 animate-pulse mt-2">
+            <div className="text-[10px]">BOSS!</div>
+          </div>
+        )}
       </div>
     </div>
   );

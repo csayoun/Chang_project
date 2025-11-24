@@ -10,11 +10,11 @@ export class Bullet {
   constructor(x: number, y: number, isPlayerBullet: boolean = true) {
     this.x = x;
     this.y = y;
-    this.width = 4;
-    this.height = 10;
-    this.speed = isPlayerBullet ? -8 : 5;
+    this.width = 3;
+    this.height = 8;
+    this.speed = isPlayerBullet ? -10 : 6;
     this.isPlayerBullet = isPlayerBullet;
-    this.color = isPlayerBullet ? '#00ff00' : '#ff0000';
+    this.color = isPlayerBullet ? '#FFFFFF' : '#FF0000'; // 플레이어: 흰색, 적: 빨간색
   }
 
   update() {
@@ -22,12 +22,25 @@ export class Bullet {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
+    ctx.imageSmoothingEnabled = false; // 픽셀 아트 스타일
+    
     ctx.fillStyle = this.color;
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1;
-
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-    ctx.strokeRect(this.x, this.y, this.width, this.height);
+    
+    if (this.isPlayerBullet) {
+      // 플레이어 총알: 흰색 세로 막대
+      ctx.fillRect(this.x, this.y, this.width, this.height);
+      // 중앙 밝은 부분
+      ctx.fillStyle = '#FFFFAA';
+      ctx.fillRect(this.x + 1, this.y + 2, 1, 4);
+    } else {
+      // 적 총알: 빨간색 세로 막대
+      ctx.fillRect(this.x, this.y, this.width, this.height);
+      // 중앙 밝은 부분
+      ctx.fillStyle = '#FF6666';
+      ctx.fillRect(this.x + 1, this.y + 2, 1, 4);
+    }
+    
+    ctx.imageSmoothingEnabled = true;
   }
 
   isOffScreen(canvasHeight: number) {

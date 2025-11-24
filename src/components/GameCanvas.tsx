@@ -8,9 +8,6 @@ import { Bullet } from './Bullet';
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
-const ENEMIES_PER_ROW = 10;
-const ENEMY_ROWS = 4;
-const ENEMY_SPACING = 60;
 const ENEMY_START_Y = 50;
 
 export function GameCanvas() {
@@ -20,7 +17,7 @@ export function GameCanvas() {
   const [enemies, setEnemies] = useState<Enemy[]>([]);
   const [playerBullets, setPlayerBullets] = useState<Bullet[]>([]);
   const [enemyBullets, setEnemyBullets] = useState<Bullet[]>([]);
-  const [stars, setStars] = useState<Array<{ x: number; y: number; speed: number }>>([]);
+  const [stars, setStars] = useState<Array<{ x: number; y: number; speed: number; color: string; size: number }>>([]);
   const lastShotTimeRef = useRef<number>(0);
   const shotCooldown = 150; // ms
 
@@ -35,11 +32,14 @@ export function GameCanvas() {
       setEnemyBullets([]);
       lastShotTimeRef.current = 0;
 
-      // 별 생성
-      const newStars = Array.from({ length: 100 }, () => ({
+      // 별 생성 (다양한 색상)
+      const starColors = ['#FFFFFF', '#FFA500', '#9370DB', '#FFD700', '#87CEEB'];
+      const newStars = Array.from({ length: 150 }, () => ({
         x: Math.random() * CANVAS_WIDTH,
         y: Math.random() * CANVAS_HEIGHT,
-        speed: 0.5 + Math.random() * 1.5,
+        speed: 0.3 + Math.random() * 2,
+        color: starColors[Math.floor(Math.random() * starColors.length)],
+        size: Math.random() < 0.7 ? 1 : 2, // 대부분 작은 별, 일부 큰 별
       }));
       setStars(newStars);
 
@@ -57,27 +57,62 @@ export function GameCanvas() {
       const boss = new Enemy(
         CANVAS_WIDTH / 2 - 40,
         100,
-        true,
+        'boss',
         stage
       );
       newEnemies.push(boss);
       setBossActive(true);
     } else {
-      // 일반 적 웨이브
-      for (let row = 0; row < ENEMY_ROWS; row++) {
-        for (let col = 0; col < ENEMIES_PER_ROW; col++) {
-          const x = (CANVAS_WIDTH - (ENEMIES_PER_ROW * ENEMY_SPACING)) / 2 + col * ENEMY_SPACING;
-          const y = ENEMY_START_Y + row * 40;
-          const enemy = new Enemy(x, y, false, stage);
-          
-          // 일부 적에게 특수 패턴 부여
-          if (Math.random() < 0.1) {
-            enemy.startZigzag();
-          }
-          
+      // 갤러그 스타일: 5줄 배치
+      // 1줄: 게 4마리
+      const crabCount = 4;
+      const crabSpacing = 120;
+      const crabStartX = (CANVAS_WIDTH - (crabCount - 1) * crabSpacing) / 2;
+      for (let i = 0; i < crabCount; i++) {
+        const enemy = new Enemy(
+          crabStartX + i * crabSpacing,
+          ENEMY_START_Y,
+          'crab',
+          stage
+        );
+        enemy.direction = i % 2 === 0 ? 1 : -1; // 좌우 교차 이동
+        newEnemies.push(enemy);
+      }
+      
+      // 2-3줄: 나비 각 10마리
+      const butterflyCount = 10;
+      const butterflySpacing = 70;
+      const butterflyStartX = (CANVAS_WIDTH - (butterflyCount - 1) * butterflySpacing) / 2;
+      for (let row = 0; row < 2; row++) {
+        for (let col = 0; col < butterflyCount; col++) {
+          const enemy = new Enemy(
+            butterflyStartX + col * butterflySpacing,
+            ENEMY_START_Y + 50 + row * 40,
+            'butterfly',
+            stage
+          );
+          enemy.direction = (row + col) % 2 === 0 ? 1 : -1;
           newEnemies.push(enemy);
         }
       }
+      
+      // 4-5줄: 벌 각 10마리
+      const beeCount = 10;
+      const beeSpacing = 70;
+      const beeStartX = (CANVAS_WIDTH - (beeCount - 1) * beeSpacing) / 2;
+      for (let row = 0; row < 2; row++) {
+        for (let col = 0; col < beeCount; col++) {
+          const enemy = new Enemy(
+            beeStartX + col * beeSpacing,
+            ENEMY_START_Y + 130 + row * 40,
+            'bee',
+            stage
+          );
+          enemy.direction = (row + col) % 2 === 0 ? 1 : -1;
+          newEnemies.push(enemy);
+        }
+      }
+      
       setBossActive(false);
     }
 
@@ -122,20 +157,25 @@ export function GameCanvas() {
         const ctx = canvasRef.current?.getContext('2d');
         if (!ctx) return;
 
+        // 픽셀 아트 렌더링 설정
+        ctx.imageSmoothingEnabled = false;
+        
         // 배경 그리기
-        ctx.fillStyle = '#0a0a0f';
+        ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        // 별 그리기
-        ctx.fillStyle = '#ffffff';
+        // 별 그리기 (픽셀 아트 스타일)
+        ctx.imageSmoothingEnabled = false;
         stars.forEach((star) => {
           star.y += star.speed * (deltaTime / 16);
           if (star.y > CANVAS_HEIGHT) {
             star.y = 0;
             star.x = Math.random() * CANVAS_WIDTH;
           }
-          ctx.fillRect(star.x, star.y, 2, 2);
+          ctx.fillStyle = star.color;
+          ctx.fillRect(Math.floor(star.x), Math.floor(star.y), star.size, star.size);
         });
+        ctx.imageSmoothingEnabled = true;
 
         // 플레이어 업데이트
         player.update(keys, CANVAS_WIDTH);
@@ -201,7 +241,18 @@ export function GameCanvas() {
                 hit = true;
                 hitEnemies.add(index);
                 if (enemy.takeDamage(1)) {
-                  addScore(enemy.isBoss ? 1000 : 100);
+                  // 타입별 점수 (갤러그 스타일)
+                  let points = 100;
+                  if (enemy.isBoss) {
+                    points = 1000;
+                  } else if (enemy.enemyType === 'crab') {
+                    points = 400; // 게는 가장 높은 점수
+                  } else if (enemy.enemyType === 'butterfly') {
+                    points = 200; // 나비는 중간 점수
+                  } else if (enemy.enemyType === 'bee') {
+                    points = 100; // 벌은 기본 점수
+                  }
+                  addScore(points);
                 }
               }
             });

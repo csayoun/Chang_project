@@ -8,11 +8,11 @@ export class Player {
 
   constructor(canvasWidth: number, canvasHeight: number) {
     this.width = 40;
-    this.height = 30;
+    this.height = 28;
     this.x = canvasWidth / 2 - this.width / 2;
-    this.y = canvasHeight - this.height - 20;
-    this.speed = 5;
-    this.color = '#00f0ff';
+    this.y = canvasHeight - this.height - 30;
+    this.speed = 6;
+    this.color = '#FFFFFF';
   }
 
   update(keys: Set<string>, canvasWidth: number) {
@@ -25,26 +25,50 @@ export class Player {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    // 우주선 그리기 (삼각형 형태)
-    ctx.fillStyle = this.color;
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
-
+    ctx.imageSmoothingEnabled = false; // 픽셀 아트 스타일
+    
+    // 갤러그 스타일 우주선 (흰색/회색)
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+    
+    // 메인 몸체 (흰색)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(this.x + 16, this.y + 4, 8, 20);
+    
+    // 날개 (회색)
+    ctx.fillStyle = '#C0C0C0';
+    // 왼쪽 날개
+    ctx.fillRect(this.x + 8, this.y + 12, 8, 4);
+    ctx.fillRect(this.x + 4, this.y + 16, 4, 4);
+    // 오른쪽 날개
+    ctx.fillRect(this.x + 24, this.y + 12, 8, 4);
+    ctx.fillRect(this.x + 32, this.y + 16, 4, 4);
+    
+    // 앞부분 (삼각형)
+    ctx.fillStyle = '#FFFFFF';
     ctx.beginPath();
-    ctx.moveTo(this.x + this.width / 2, this.y);
-    ctx.lineTo(this.x, this.y + this.height);
-    ctx.lineTo(this.x + this.width / 4, this.y + this.height * 0.7);
-    ctx.lineTo(this.x + this.width * 0.75, this.y + this.height * 0.7);
-    ctx.lineTo(this.x + this.width, this.y + this.height);
+    ctx.moveTo(centerX, this.y);
+    ctx.lineTo(this.x + 12, this.y + 8);
+    ctx.lineTo(this.x + 28, this.y + 8);
     ctx.closePath();
     ctx.fill();
-    ctx.stroke();
-
-    // 엔진 불꽃 효과
-    ctx.fillStyle = '#ffaa00';
+    
+    // 외곽선
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(this.x + 16, this.y + 4, 8, 20);
+    ctx.strokeRect(this.x + 8, this.y + 12, 8, 4);
+    ctx.strokeRect(this.x + 24, this.y + 12, 8, 4);
+    ctx.strokeRect(this.x + 4, this.y + 16, 4, 4);
+    ctx.strokeRect(this.x + 32, this.y + 16, 4, 4);
     ctx.beginPath();
-    ctx.arc(this.x + this.width / 2, this.y + this.height, 5, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.moveTo(centerX, this.y);
+    ctx.lineTo(this.x + 12, this.y + 8);
+    ctx.lineTo(this.x + 28, this.y + 8);
+    ctx.closePath();
+    ctx.stroke();
+    
+    ctx.imageSmoothingEnabled = true;
   }
 
   getBounds() {
